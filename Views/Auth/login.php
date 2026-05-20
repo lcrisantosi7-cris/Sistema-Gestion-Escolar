@@ -1,13 +1,8 @@
 <?php
-// 1. Lógica de procesamiento (Siempre al principio) 🛠️
 $error = '';
 require_once '../../Controllers/Auth/AuthController.php';
 $auth = new AuthController();
-
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Intentamos el login. Si falla, el controlador devuelve el mensaje de error.
-    // Si tiene éxito, el controlador mismo debería hacer el header("Location: ...")
     $error = $auth->login();
 }
 ?>
@@ -16,160 +11,202 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso - Sistema Escolar</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <title>EduCore — Acceso</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            --card-bg: rgba(255, 255, 255, 0.98);
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            margin: 0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background: var(--bg-gradient);
-            height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: #f1f5f9;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
-        }
-
-        body::before {
-            content: "";
-            position: absolute;
-            width: 300px; height: 300px;
-            background: var(--primary);
-            filter: blur(150px);
-            opacity: 0.2;
-            top: 10%; left: 10%;
-        }
-
-        .login-container {
-            width: 100%;
-            max-width: 400px;
             padding: 20px;
-            z-index: 1;
+            -webkit-font-smoothing: antialiased;
         }
 
-        .login-card {
-            background: var(--card-bg);
-            padding: 40px;
-            border-radius: 24px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        .login-wrap {
+            width: 100%;
+            max-width: 380px;
+        }
+
+        /* Brand */
+        .brand {
             text-align: center;
+            margin-bottom: 32px;
         }
-
-        .logo-circle {
-            width: 64px;
-            height: 64px;
-            background: #eff6ff;
-            border-radius: 16px;
-            display: flex;
+        .brand-icon {
+            width: 44px;
+            height: 44px;
+            background: #2563eb;
+            border-radius: 12px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-            color: var(--primary);
-            font-size: 28px;
+            color: #fff;
+            font-size: 18px;
+            margin-bottom: 12px;
         }
-
-        h2 { color: var(--text-main); font-weight: 800; margin: 0 0 8px 0; }
-        p.subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 30px; }
-
-        .input-group { position: relative; margin-bottom: 16px; text-align: left; }
-        .input-group i { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
-
-        input {
-            width: 100%;
-            padding: 14px 16px 14px 45px;
-            border: 1.5px solid #e2e8f0;
-            border-radius: 12px;
-            box-sizing: border-box;
-            background: #f8fafc;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: white;
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
+        .brand-name {
+            font-size: 20px;
             font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+        .brand-sub {
+            font-size: 13px;
+            color: #64748b;
+            margin-top: 2px;
         }
 
-        .error-msg {
-            background: #fef2f2;
-            color: #991b1b;
-            padding: 12px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            margin-bottom: 20px;
-            border: 1px solid #fee2e2;
+        /* Card */
+        .card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.04);
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+        .card-sub {
+            font-size: 13px;
+            color: #64748b;
+            margin-bottom: 24px;
+        }
+
+        /* Error */
+        .error-box {
             display: flex;
             align-items: center;
             gap: 8px;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 20px;
         }
 
-        .footer { margin-top: 30px; font-size: 11px; color: var(--text-muted); }
+        /* Form */
+        .form-group { margin-bottom: 16px; }
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+        .input-wrap {
+            position: relative;
+        }
+        .input-wrap i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 13px;
+            pointer-events: none;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 9px 13px 9px 36px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #0f172a;
+            background: #f8fafc;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #2563eb;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background: #2563eb;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        button[type="submit"]:hover { background: #1d4ed8; }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 11px;
+            color: #94a3b8;
+        }
     </style>
 </head>
 <body>
+    <div class="login-wrap">
+        <div class="brand">
+            <div class="brand-icon"><i class="fas fa-graduation-cap"></i></div>
+            <div class="brand-name">EduCore</div>
+            <div class="brand-sub">Sistema de Gestión Académica</div>
+        </div>
 
-    <div class="login-container">
-        <div class="login-card">
-            <div class="logo-circle">
-                <i class="fas fa-graduation-cap"></i>
-            </div>
-            
-            <h2>¡Bienvenido!</h2>
-            <p class="subtitle">Identifícate para acceder al panel</p>
-            
-            <?php if(!empty($error)): ?>
-                <div class="error-msg">
-                    <i class="fas fa-circle-exclamation"></i> <?= htmlspecialchars($error) ?>
+        <div class="card">
+            <div class="card-title">Iniciar sesión</div>
+            <div class="card-sub">Ingresa tus credenciales para continuar</div>
+
+            <?php if (!empty($error)): ?>
+                <div class="error-box">
+                    <i class="fas fa-circle-exclamation"></i>
+                    <?= htmlspecialchars($error) ?>
                 </div>
             <?php endif; ?>
 
             <form method="POST" action="login.php">
-                <div class="input-group">
-                    <i class="fas fa-user"></i>
-                    <input type="text" name="username" placeholder="Usuario" required autocomplete="off">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-user"></i>
+                        <input type="text" id="username" name="username" placeholder="Nombre de usuario" required autocomplete="off">
+                    </div>
                 </div>
-                
-                <div class="input-group">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" name="password" placeholder="Contraseña" required>
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <div class="input-wrap">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" id="password" name="password" placeholder="••••••••" required>
+                    </div>
                 </div>
-                
                 <button type="submit">
-                    Ingresar al Sistema <i class="fas fa-arrow-right-to-bracket"></i>
+                    Ingresar <i class="fas fa-arrow-right"></i>
                 </button>
             </form>
-            
-            <div class="footer">
-                I.E. Mariscal Ramón Castilla Marquezado
-            </div>
         </div>
-    </div>
 
+        <div class="footer">EduCore © 2026 — Todos los derechos reservados</div>
+    </div>
 </body>
 </html>

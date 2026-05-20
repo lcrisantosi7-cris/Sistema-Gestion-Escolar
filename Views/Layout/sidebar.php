@@ -1,95 +1,182 @@
 <style>
-    .sidebar { 
-        width: var(--sidebar-w); background: var(--sidebar-bg); height: 100vh; 
-        position: fixed; left: 0; top: 0; display: flex; flex-direction: column; 
+    .sidebar {
+        width: var(--sidebar-w);
+        background: var(--sidebar-bg);
+        height: 100vh;
+        position: fixed;
+        left: 0; top: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
-    .brand { 
-        height: var(--topbar-h); padding: 0 25px; display: flex; 
-        align-items: center; gap: 12px; background: rgba(0,0,0,0.2); 
-    }
-    .brand i { color: #60a5fa; font-size: 24px; }
-    .brand span { color: white; font-weight: 700; font-size: 1.1rem; }
 
-    .menu { list-style: none; padding: 20px 15px; margin: 0; overflow-y: auto; }
-    .menu-label { 
-        color: #64748b; font-size: 11px; font-weight: 700; 
-        text-transform: uppercase; padding: 20px 15px 10px; 
+    /* Brand */
+    .brand {
+        height: var(--topbar-h);
+        padding: 0 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.06);
+        flex-shrink: 0;
     }
-    .menu a { 
-        display: flex; align-items: center; gap: 12px; padding: 12px 15px; 
-        color: #cbd5e1; text-decoration: none; border-radius: 10px; margin-bottom: 4px; transition: 0.2s;
+    .brand-icon {
+        width: 30px;
+        height: 30px;
+        background: var(--color-primary);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        color: #fff;
+        flex-shrink: 0;
     }
-    .menu a:hover { background: var(--sidebar-hover); color: white; }
-    .menu a i { width: 20px; text-align: center; }
-    .menu a:hover { 
-        background: var(--sidebar-hover); 
-        color: white; 
-    }
-    .menu a:hover i { transform: scale(1.2); color: #60a5fa; }
-    .menu a.active { 
-        background: rgba(59, 130, 246, 0.15); 
-        color: #60a5fa; 
+    .brand-text { line-height: 1.2; }
+    .brand-name {
+        font-size: 14px;
         font-weight: 700;
-        box-shadow: inset 4px 0 0 0 #3b82f6;
+        color: #f1f5f9;
+        letter-spacing: -0.01em;
     }
-    .menu a.active i { color: #60a5fa; }
-</style>
-<?php
-$archivo_actual = basename($_SERVER['PHP_SELF']);
-?>
+    .brand-sub {
+        font-size: 10px;
+        color: var(--sidebar-text);
+        font-weight: 400;
+    }
 
+    /* Nav */
+    .nav {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px 12px;
+        scrollbar-width: none;
+    }
+    .nav::-webkit-scrollbar { display: none; }
+
+    .nav-section {
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(148,163,184,0.5);
+        padding: 16px 8px 6px;
+    }
+    .nav-section:first-child { padding-top: 4px; }
+
+    .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        text-decoration: none;
+        color: var(--sidebar-text);
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.15s;
+        margin-bottom: 2px;
+    }
+    .nav-item:hover {
+        background: var(--sidebar-hover);
+        color: var(--sidebar-text-active);
+    }
+    .nav-item.active {
+        background: var(--sidebar-active-bg);
+        color: #60a5fa;
+        font-weight: 600;
+    }
+    .nav-item i {
+        width: 16px;
+        text-align: center;
+        font-size: 13px;
+        flex-shrink: 0;
+        opacity: 0.8;
+    }
+    .nav-item.active i { opacity: 1; }
+
+    /* Footer */
+    .sidebar-footer {
+        padding: 14px 20px;
+        border-top: 1px solid rgba(255,255,255,0.06);
+        flex-shrink: 0;
+    }
+    .sidebar-footer-text {
+        font-size: 10px;
+        color: rgba(148,163,184,0.4);
+        line-height: 1.5;
+    }
+</style>
+
+<?php
+$uri = $_SERVER['REQUEST_URI'];
+function isActive($path) {
+    global $uri;
+    return strpos($uri, $path) !== false ? 'active' : '';
+}
+?>
 
 <aside class="sidebar">
     <div class="brand">
-        <i class="fas fa-graduation-cap"></i>
-        <span>I.E. MRCM</span>
+        <div class="brand-icon"><i class="fas fa-graduation-cap"></i></div>
+        <div class="brand-text">
+            <div class="brand-name">EduCore</div>
+            <div class="brand-sub">Gestión Académica</div>
+        </div>
     </div>
-    
-    <ul class="menu">
-        <li><a href="../Dashboard/home.php" class="<?= (strpos($_SERVER['REQUEST_URI'], 'Dashboard') !== false ? 'active' : '') ?>">
-            <i class="fas fa-chart-pie"></i> Inicio</a></li>
+
+    <nav class="nav">
+        <div class="nav-section">General</div>
+        <a href="../Dashboard/home.php" class="nav-item <?= isActive('Dashboard') ?>">
+            <i class="fas fa-house"></i> Inicio
+        </a>
 
         <?php if ($_SESSION['rol'] == 'Docente'): ?>
-            <div class="menu-label">Aula Virtual</div>
-            <li><a href="../Asistencia/index.php" class="<?= (strpos($_SERVER['REQUEST_URI'], 'Asistencia') !== false ? 'active' : '') ?>">
-                <i class="fas fa-user-check"></i> Asistencia</a></li>
-            <li><a href="../Notas/index.php" class="<?= (strpos($_SERVER['REQUEST_URI'], 'Notas') !== false ? 'active' : '') ?>">
-                <i class="fas fa-star"></i> Notas</a></li>
+            <div class="nav-section">Aula</div>
+            <a href="../Asistencia/index.php" class="nav-item <?= isActive('Asistencia') ?>">
+                <i class="fas fa-clipboard-check"></i> Asistencia
+            </a>
+            <a href="../Notas/index.php" class="nav-item <?= isActive('Notas') ?>">
+                <i class="fas fa-pen-to-square"></i> Calificaciones
+            </a>
 
-        <?php else: // Para Directores y Administrativos 🏛️ ?>
-            <div class="menu-label">Configuración</div>
-            <li><a href="../Periodo_academico/periodo_form.php" class="<?= (strpos($_SERVER['REQUEST_URI'], 'Periodo_academico') !== false ? 'active' : '') ?>">
-                <i class="fas fa-calendar"></i> Periodo</a></li>
-            <li><a href="../Grado_Seccion/index.php" class="<?= (strpos($_SERVER['REQUEST_URI'], 'Grado_Seccion') !== false ? 'active' : '') ?>">
-                <i class="fas fa-th-large"></i> Grados</a></li>
-            
-            <div class="menu-label">Gestión</div>
-            <li><a href="../Gestion_Estudiantes/directorio.php" class="<?= (strpos($_SERVER['REQUEST_URI'], 'Gestion_Estudiantes/directorio') !== false ? 'active' : '') ?>">
-                <i class="fas fa-users"></i> Estudiantes</a></li>
-            <li><a href="../Gestion_Estudiantes/nueva_matricula.php" class="<?= (strpos($_SERVER['REQUEST_URI'], 'Gestion_Estudiantes/nueva_matricula') !== false ? 'active' : '') ?>">
-                <i class="fas fa-user-plus"></i> Matricular</a></li>
-            <li><a href="../Boleta_Notas/index.php" class="<?= (strpos($_SERVER['REQUEST_URI'], 'Boleta_Notas') !== false ? 'active' : '') ?>">
-                <i class="fas fa-file-pdf"></i> Boletas</a></li>
+        <?php else: ?>
+            <div class="nav-section">Configuración</div>
+            <a href="../Periodo_academico/periodo_form.php" class="nav-item <?= isActive('Periodo_academico') ?>">
+                <i class="fas fa-calendar-days"></i> Periodo Académico
+            </a>
+            <a href="../Grado_Seccion/index.php" class="nav-item <?= isActive('Grado_Seccion') ?>">
+                <i class="fas fa-layer-group"></i> Grados y Secciones
+            </a>
 
-            <div class="menu-label">Usuarios</div>
-            <li><a href="../Administracion/index.php" class="<?= (strpos($_SERVER['REQUEST_URI'], 'Administracion') !== false ? 'active' : '') ?>">
-                <i class="fas fa-user-cog"></i> Usuarios</a></li>
-            <li><a href="../Gestion_Estudiantes/directorio.php" class="<?= (strpos($_SERVER['REQUEST_URI'], 'Gestion_Estudiantes/directorio') !== false ? 'active' : '') ?>">
-                <i class="fas fa-users"></i> Estudiantes</a></li>
+            <div class="nav-section">Estudiantes</div>
+            <a href="../Gestion_Estudiantes/directorio.php" class="nav-item <?= isActive('Gestion_Estudiantes/directorio') ?>">
+                <i class="fas fa-users"></i> Directorio
+            </a>
+            <a href="../Gestion_Estudiantes/nueva_matricula.php" class="nav-item <?= isActive('Gestion_Estudiantes/nueva_matricula') ?>">
+                <i class="fas fa-user-plus"></i> Nueva Matrícula
+            </a>
+            <a href="../Boleta_Notas/index.php" class="nav-item <?= isActive('Boleta_Notas') ?>">
+                <i class="fas fa-file-lines"></i> Boletas de Notas
+            </a>
 
+            <div class="nav-section">Administración</div>
+            <a href="../Administracion/index.php" class="nav-item <?= isActive('Administracion') ?>">
+                <i class="fas fa-users-gear"></i> Personal
+            </a>
         <?php endif; ?>
-    </ul>
-    
+    </nav>
+
+    <div class="sidebar-footer">
+        <div class="sidebar-footer-text">EduCore v1.0<br>© 2026 Todos los derechos reservados</div>
+    </div>
 </aside>
 
 <script>
-    function toggleDropdown() {
-        document.getElementById("userDropdown").classList.toggle("show");
-    }
-    // Cerrar si se hace clic fuera
-    window.onclick = function(e) {
-        if (!e.target.closest('.user-info')) {
-            document.getElementById("userDropdown").classList.remove('show');
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!e.target.closest('.user-menu')) {
+            document.querySelectorAll('.dropdown').forEach(d => d.classList.remove('open'));
         }
-    }
+    });
 </script>

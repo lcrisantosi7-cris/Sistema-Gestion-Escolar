@@ -2,222 +2,160 @@
 ob_start();
 require_once '../Layout/header.php';
 require_once '../../Controllers/Notas/NotaController.php';
-
-$control = new NotaController();
+$control     = new NotaController();
 $idAsignacion = $_GET['id'] ?? null;
-if(!$idAsignacion) header("Location: index.php");
-
-// Procesar Guardado
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $control->guardar($_POST);
-}
-
-// Cargar Datos
-$data = $control->registro($idAsignacion);
-$info = $data['info'];
+if (!$idAsignacion) header("Location: index.php");
+if ($_SERVER['REQUEST_METHOD'] === 'POST') { $control->guardar($_POST); }
+$data        = $control->registro($idAsignacion);
+$info        = $data['info'];
 $competencias = $data['competencias'];
-$bimestres = $data['bimestres'];
-$alumnos = $data['alumnos'];
-$notas = $data['notas'];
+$bimestres   = $data['bimestres'];
+$alumnos     = $data['alumnos'];
+$notas       = $data['notas'];
 ?>
-
 <style>
-    /* Cabecera Fija Estilizada 📌 */
-    .sticky-header {
-        position: sticky;
-        top: 0;
-        background: white;
-        z-index: 100;
-        padding: 20px 0;
-        border-bottom: 2px solid #f1f5f9;
-        margin-bottom: 30px;
+    .grades-header {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 16px 20px;
+        margin-bottom: 20px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        position: sticky;
+        top: var(--topbar-h);
+        z-index: 50;
     }
+    .grades-header-info h3 { font-size: 15px; font-weight: 700; }
+    .grades-header-info p  { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
 
-    /* Contenedor de Alumno 👨‍🎓 */
-    .student-card {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        margin-bottom: 25px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    .student-block {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        margin-bottom: 12px;
         overflow: hidden;
     }
-
-    .student-name-tag {
-        background: #f8fafc;
-        padding: 12px 20px;
-        border-bottom: 1px solid #e2e8f0;
+    .student-name-row {
+        background: var(--gray-50);
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--border);
         display: flex;
         align-items: center;
-        gap: 10px;
-        color: var(--text-main);
-        font-weight: 700;
+        gap: 8px;
+        font-size: 13px;
+        font-weight: 600;
     }
+    .student-name-row i { color: var(--color-primary); }
 
-    /* Grilla de Competencias 📋 */
-    .comp-item {
+    .comp-row {
         display: grid;
         grid-template-columns: 1fr auto;
-        padding: 15px 20px;
-        border-bottom: 1px solid #f1f5f9;
         align-items: center;
-        gap: 20px;
+        gap: 16px;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--gray-100);
     }
-    .comp-item:last-child { border-bottom: none; }
+    .comp-row:last-child { border-bottom: none; }
+    .comp-text { font-size: 12px; color: var(--text-secondary); line-height: 1.4; }
+    .comp-text strong { display: block; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 2px; }
 
-    .comp-info {
-        font-size: 13px;
-        color: #475569;
-        line-height: 1.4;
-    }
-
-    /* Entradas de Notas ✍️ */
-    .grades-wrapper {
-        display: flex;
-        gap: 8px;
-    }
-
-    .input-box {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .bim-label {
-        font-size: 10px;
-        font-weight: 800;
-        color: #94a3b8;
-        margin-bottom: 4px;
-        text-transform: uppercase;
-    }
-
+    .bim-inputs { display: flex; gap: 6px; }
+    .bim-wrap { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+    .bim-label { font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; }
     .grade-input {
-        width: 42px;
-        height: 38px;
+        width: 40px;
+        height: 36px;
         text-align: center;
-        border-radius: 8px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 13px;
         font-weight: 700;
-        font-size: 14px;
-        transition: 0.2s;
-        border: 1px solid #cbd5e1;
+        font-family: inherit;
+        transition: all 0.15s;
     }
-
-    /* Colores según estado 🎨 */
-    .input-active {
-        background: white;
-        color: var(--primary);
-        border-color: var(--primary);
+    .grade-input.editable {
+        background: var(--bg-card);
+        color: var(--color-primary);
+        border-color: var(--color-primary);
     }
-    .input-active:focus {
+    .grade-input.editable:focus {
         outline: none;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
     }
-
-    .input-locked {
-        background: #f1f5f9;
-        color: #94a3b8;
+    .grade-input.locked {
+        background: var(--gray-50);
+        color: var(--text-muted);
         cursor: not-allowed;
-        border: 1px solid #e2e8f0;
-    }
-
-    /* Botones ⚡ */
-    .btn-save-main {
-        background: #10b981;
-        color: white;
-        padding: 12px 24px;
-        border-radius: 10px;
-        border: none;
-        font-weight: 700;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        transition: 0.3s;
-    }
-    .btn-save-main:hover {
-        background: #059669;
-        transform: translateY(-2px);
     }
 </style>
 
-<div class="section-container" style="max-width: 1000px; margin: 0 auto;">
-    
-    <div class="sticky-header">
-        <div>
-            <h2 style="margin:0; color:var(--text-main);">Registro de Calificaciones</h2>
-            <div style="margin-top:4px;">
-                <span class="badge" style="background:var(--primary); color:white; padding:4px 8px; border-radius:6px; font-size:11px;">
-                    <?= $info['nombreCurso'] ?>
-                </span>
-                <span style="color:var(--text-muted); font-size:13px; margin-left:5px;">
-                    <?= $info['nombreGrado'] ?> "<?= $info['nombreSeccion'] ?>"
-                </span>
-            </div>
-        </div>
-        <div style="display:flex; gap:12px; align-items:center;">
-            <a href="index.php" style="text-decoration:none; color:var(--text-muted); font-weight:600; font-size:14px;">Cancelar</a>
-            <button type="submit" form="formNotas" class="btn-save-main">
-                <i class="fas fa-save"></i> GUARDAR CALIFICACIONES
-            </button>
-        </div>
+<div class="grades-header">
+    <div class="grades-header-info">
+        <h3><?= htmlspecialchars($info['nombreCurso']) ?></h3>
+        <p><?= htmlspecialchars($info['nombreGrado']) ?> &middot; Sección <?= htmlspecialchars($info['nombreSeccion']) ?> &middot; <?= htmlspecialchars($info['nivel']) ?></p>
     </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+        <a href="index.php" class="btn btn-ghost">Cancelar</a>
+        <button type="submit" form="formNotas" class="btn btn-success">
+            <i class="fas fa-floppy-disk"></i> Guardar calificaciones
+        </button>
+    </div>
+</div>
 
-    <?php if(isset($_GET['msg']) && $_GET['msg']=='ok'): ?>
-        <div style="background:#ecfdf5; color:#065f46; padding:15px; border-radius:10px; margin-bottom:25px; border:1px solid #a7f3d0; display:flex; align-items:center; gap:10px;">
-            <i class="fas fa-check-circle"></i> Notas guardadas correctamente en el sistema.
+<?php if (isset($_GET['msg']) && $_GET['msg'] == 'ok'): ?>
+    <div class="alert alert-success"><i class="fas fa-circle-check"></i> Calificaciones guardadas correctamente.</div>
+<?php endif; ?>
+
+<form id="formNotas" method="POST">
+    <input type="hidden" name="idAsignacion" value="<?= $idAsignacion ?>">
+
+    <?php foreach ($alumnos as $alum): ?>
+        <div class="student-block">
+            <div class="student-name-row">
+                <i class="fas fa-user-circle"></i>
+                <?= htmlspecialchars(mb_strtoupper($alum['apellidoPaterno'] . ' ' . $alum['apellidoMaterno'] . ', ' . $alum['nombres'])) ?>
+            </div>
+            <?php foreach ($competencias as $comp): ?>
+                <div class="comp-row">
+                    <div class="comp-text">
+                        <strong>Competencia</strong>
+                        <?= htmlspecialchars($comp['textCompetencia']) ?>
+                    </div>
+                    <div class="bim-inputs">
+                        <?php foreach ($bimestres as $bi):
+                            $idMat  = $alum['idMatricula'];
+                            $idComp = $comp['idCompetenciaCurso'];
+                            $idBim  = $bi['idBimestre'];
+                            $val    = $notas[$idMat][$idComp][$idBim] ?? '';
+                            $active = ($bi['estado'] == 'Activo');
+                        ?>
+                            <div class="bim-wrap">
+                                <span class="bim-label"><?= substr($bi['nombreBimestre'], 0, 3) ?></span>
+                                <input type="text"
+                                       name="notas[<?= $idMat ?>][<?= $idComp ?>][<?= $idBim ?>]"
+                                       value="<?= htmlspecialchars($val) ?>"
+                                       class="grade-input <?= $active ? 'editable' : 'locked' ?>"
+                                       <?= $active ? '' : 'readonly' ?>
+                                       maxlength="2"
+                                       autocomplete="off">
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    <?php endforeach; ?>
+
+    <?php if (empty($alumnos)): ?>
+        <div class="card" style="padding:0;">
+            <div class="empty-state">
+                <i class="fas fa-users-slash"></i>
+                <p>No hay alumnos matriculados en esta sección</p>
+            </div>
         </div>
     <?php endif; ?>
+</form>
 
-    <form id="formNotas" method="POST">
-        <input type="hidden" name="idAsignacion" value="<?= $idAsignacion ?>">
-        
-        <?php foreach($alumnos as $alum): ?>
-            <div class="student-card">
-                <div class="student-name-tag">
-                    <i class="fas fa-user-circle" style="color:var(--primary); font-size:1.2rem;"></i>
-                    <?= mb_strtoupper($alum['apellidoPaterno']." ".$alum['apellidoMaterno'].", ".$alum['nombres']) ?>
-                </div>
-
-                <?php foreach($competencias as $comp): ?>
-                    <div class="comp-item">
-                        <div class="comp-info">
-                            <span style="font-weight:700; color:var(--text-main); display:block; margin-bottom:2px;">Competencia:</span>
-                            <?= $comp['textCompetencia'] ?>
-                        </div>
-                        
-                        <div class="grades-wrapper">
-                            <?php foreach($bimestres as $bi): 
-                                $idMat = $alum['idMatricula'];
-                                $idComp = $comp['idCompetenciaCurso'];
-                                $idBim = $bi['idBimestre'];
-                                $valorNota = $notas[$idMat][$idComp][$idBim] ?? '';
-                                $esEditable = ($bi['estado'] == 'Activo');
-                            ?>
-                                <div class="input-box">
-                                    <span class="bim-label"><?= substr($bi['nombreBimestre'], 0, 3) ?></span>
-                                    <input type="text" 
-                                           name="notas[<?= $idMat ?>][<?= $idComp ?>][<?= $idBim ?>]" 
-                                           value="<?= $valorNota ?>" 
-                                           class="grade-input <?= $esEditable ? 'input-active' : 'input-locked' ?>" 
-                                           <?= $esEditable ? '' : 'readonly' ?>
-                                           maxlength="2"
-                                           autocomplete="off">
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-            </div>
-        <?php endforeach; ?>
-        
-        <?php if(empty($alumnos)): ?>
-            <div style="text-align:center; padding:50px; background:white; border-radius:12px; color:var(--text-muted); border:1px dashed #cbd5e1;">
-                <i class="fas fa-users-slash" style="font-size:2rem; margin-bottom:10px; display:block;"></i>
-                No hay alumnos matriculados en esta sección.
-            </div>
-        <?php endif; ?>
-    </form>
-</div>
+</div></main></body></html>

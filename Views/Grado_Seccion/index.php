@@ -1,277 +1,120 @@
 <?php
-// 1. CARGAR LAYOUT
 ob_start();
 require_once '../Layout/header.php';
-
 require_once '../../Controllers/Gestion_Institucional/GradoSeccionController.php';
 $control = new GradoSeccionController();
-
-// Manejo de eliminación
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
     $control->eliminar($_GET['id']);
 }
-
 $datos = $control->index();
-
-// Si hay error (no hay periodo activo)
 if (isset($datos['error'])) {
-    echo "<div class='error-container'><div class='error-box'><h3>⛔ " . $datos['error'] . "</h3></div></div>";
+    echo '<div class="alert alert-danger"><i class="fas fa-circle-exclamation"></i> ' . htmlspecialchars($datos['error']) . '</div>';
+    echo '</div></main></body></html>';
     exit;
 }
-
-$grados = $datos['grados'];
+$grados  = $datos['grados'];
 $periodo = $datos['periodo'];
 ?>
-
 <style>
-    :root {
-        --primary-color: #3b82f6;
-        --secondary-color: #64748b;
-        --success-color: #10b981;
-        --danger-color: #ef4444;
-        --warning-color: #f59e0b;
-        --bg-body: #f1f5f9;
-        --card-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    }
-
-    /* Estilo del contenedor principal */
-    .main-wrapper {
-        padding: 2rem;
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    }
-
-    .header-dashboard {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid #e2e8f0;
-    }
-
-    .header-title h2 {
-        font-size: 1.875rem;
-        font-weight: 800;
-        color: #1e293b;
-        margin: 0;
-    }
-
-    .period-tag {
-        font-size: 0.875rem;
-        background: #dbeafe;
-        color: #1e40af;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-weight: 600;
-        margin-left: 0.5rem;
-    }
-
-    /* Grid de Grados */
-    .grados-container {
+    .grades-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 1.5rem;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 16px;
     }
-
-    /* Tarjeta de Grado */
-    .grado-card {
-        background: white;
-        border-radius: 1rem;
-        box-shadow: var(--card-shadow);
-        border: 1px solid #e2e8f0;
-        display: flex;
-        flex-direction: column;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    .grade-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        transition: box-shadow 0.15s;
     }
-
-    .grado-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-        border-color: var(--primary-color);
-    }
-
-    .grado-header {
-        padding: 1.25rem;
-        background: #f8fafc;
-        border-bottom: 1px solid #e2e8f0;
-        border-radius: 1rem 1rem 0 0;
+    .grade-card:hover { box-shadow: var(--shadow-md); }
+    .grade-card-header {
+        padding: 14px 16px;
+        background: var(--gray-50);
+        border-bottom: 1px solid var(--border);
         display: flex;
         justify-content: space-between;
         align-items: center;
     }
-    
-    .grado-title { 
-        margin: 0; 
-        font-size: 1.125rem; 
-        font-weight: 700; 
-        color: #1e293b; 
-    }
+    .grade-name { font-size: 14px; font-weight: 700; }
+    .grade-level { font-size: 11px; color: var(--text-muted); margin-top: 2px; text-transform: uppercase; font-weight: 600; }
 
-    .grado-badge { 
-        font-size: 0.75rem; 
-        background: #f1f5f9; 
-        padding: 0.2rem 0.6rem; 
-        border-radius: 6px; 
-        color: #475569; 
-        text-transform: uppercase;
-        font-weight: 600;
-        display: inline-block;
-        margin-top: 0.25rem;
-    }
-
-    /* Lista de Secciones */
-    .seccion-list { list-style: none; padding: 0; margin: 0; }
-    
-    .seccion-item {
-        padding: 1.25rem;
-        border-bottom: 1px solid #f1f5f9;
+    .section-list { list-style: none; }
+    .section-item {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        transition: background 0.2s;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--gray-100);
+        transition: background 0.15s;
     }
-
-    .seccion-item:last-child { border-bottom: none; }
-    .seccion-item:hover { background: #f8fafc; }
-
-    .sec-nombre { 
-        font-weight: 700; 
-        color: var(--primary-color); 
-        font-size: 1rem; 
-        display: block;
-        margin-bottom: 0.25rem;
-    }
-
-    .sec-info { 
-        font-size: 0.813rem; 
-        color: #64748b; 
-        line-height: 1.5;
-    }
-
-    .sec-info i { width: 16px; margin-right: 4px; color: #94a3b8; }
-    
-    /* Botones y Acciones */
-    .sec-actions { display: flex; gap: 0.5rem; }
-
-    .btn-action {
-        width: 32px;
-        height: 32px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 8px;
-        transition: all 0.2s;
-        text-decoration: none !important;
-    }
-
-    .btn-edit { background: #fffbeb; color: var(--warning-color); }
-    .btn-edit:hover { background: var(--warning-color); color: white; }
-
-    .btn-del { background: #fef2f2; color: var(--danger-color); }
-    .btn-del:hover { background: var(--danger-color); color: white; }
-
-    .btn-add { 
-        background: var(--success-color); 
-        color: white !important; 
-        padding: 0.5rem 1rem; 
-        border-radius: 0.75rem; 
-        font-size: 0.875rem; 
-        font-weight: 600; 
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .btn-add:hover { background: #059669; transform: scale(1.05); }
-
-    .alert-custom {
-        background: #ecfdf5;
-        border-left: 4px solid var(--success-color);
-        color: #065f46;
-        padding: 1rem;
-        border-radius: 0.5rem;
-        margin-bottom: 2rem;
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-    }
-
-    .empty-msg { 
-        padding: 3rem 1rem; 
-        text-align: center; 
-        color: #94a3b8; 
-        font-size: 0.875rem; 
-        font-style: italic; 
-    }
+    .section-item:last-child { border-bottom: none; }
+    .section-item:hover { background: var(--gray-50); }
+    .section-name { font-size: 13px; font-weight: 600; color: var(--color-primary); }
+    .section-meta { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+    .section-meta i { width: 13px; color: var(--text-muted); }
+    .section-actions { display: flex; gap: 5px; }
 </style>
 
-<div class="main-wrapper">
-    <div class="header-dashboard">
-        <div class="header-title">
-            <h2>
-                <i class="fas fa-th-large" style="color:var(--primary-color);"></i> 
-                Gestión de Secciones 
-                <span class="period-tag">Periodo <?= $periodo['anio'] ?></span>
-            </h2>
-        </div>
-    </div>
-
-    <?php if(isset($_GET['msg'])): ?>
-        <div class="alert-custom">
-            <i class="fas fa-check-circle" style="font-size: 1.25rem;"></i>
-            <span>Operación realizada con éxito. Los cambios se han guardado.</span>
-        </div>
-    <?php endif; ?>
-
-    <div class="grados-container">
-        <?php foreach($grados as $g): ?>
-            
-            <div class="grado-card">
-                <div class="grado-header">
-                    <div>
-                        <h4 class="grado-title"><?= $g['nombreGrado'] ?></h4>
-                        <span class="grado-badge"><?= $g['nivel'] ?></span>
-                    </div>
-                    <a href="seccion_form.php?idGrado=<?= $g['idGrado'] ?>" class="btn-add">
-                        <i class="fas fa-plus"></i> Sección
-                    </a>
-                </div>
-
-                <?php if(count($g['secciones']) > 0): ?>
-                    <ul class="seccion-list">
-                        <?php foreach($g['secciones'] as $sec): ?>
-                            <li class="seccion-item">
-                                <div>
-                                    <span class="sec-nombre">Sección "<?= $sec['nombreSeccion'] ?>"</span>
-                                    <div class="sec-info">
-                                        <div><i class="fas fa-users"></i> <strong><?= $sec['vacantes'] ?></strong> vacantes</div>
-                                        <div><i class="fas fa-user-tie"></i> <?= $sec['nombres'] . " " . $sec['apellidoPaterno'] ?></div>
-                                    </div>
-                                </div>
-                                <div class="sec-actions">
-                                    <a href="seccion_form.php?idSeccion=<?= $sec['idSeccion'] ?>&idGrado=<?= $g['idGrado'] ?>" class="btn-action btn-edit" title="Editar">
-                                        <i class="fas fa-pencil-alt"></i>
-                                    </a>
-                                    <a href="index.php?action=delete&id=<?= $sec['idSeccion'] ?>" 
-                                       class="btn-action btn-del" title="Eliminar"
-                                       onclick="return confirm('¿Seguro que deseas eliminar la sección <?= $sec['nombreSeccion'] ?>?')">
-                                        <i class="fas fa-trash"></i>
-                                    </a>
-                                </div>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php else: ?>
-                    <div class="empty-msg">
-                        <i class="fas fa-info-circle" style="display:block; font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.5;"></i>
-                        No hay secciones registradas
-                    </div>
-                <?php endif; ?>
-            </div>
-
-        <?php endforeach; ?>
+<div class="page-header">
+    <div>
+        <div class="page-title"><i class="fas fa-layer-group"></i> Grados y Secciones</div>
+        <div class="page-subtitle">Periodo <?= htmlspecialchars($periodo['anio']) ?></div>
     </div>
 </div>
 
-</body>
-</html>
+<?php if (isset($_GET['msg'])): ?>
+    <div class="alert alert-success"><i class="fas fa-circle-check"></i> Operación realizada con éxito.</div>
+<?php endif; ?>
+
+<div class="grades-grid">
+    <?php foreach ($grados as $g): ?>
+        <div class="grade-card">
+            <div class="grade-card-header">
+                <div>
+                    <div class="grade-name"><?= htmlspecialchars($g['nombreGrado']) ?></div>
+                    <div class="grade-level"><?= htmlspecialchars($g['nivel']) ?></div>
+                </div>
+                <a href="seccion_form.php?idGrado=<?= $g['idGrado'] ?>" class="btn btn-success btn-sm">
+                    <i class="fas fa-plus"></i> Sección
+                </a>
+            </div>
+
+            <?php if (count($g['secciones']) > 0): ?>
+                <ul class="section-list">
+                    <?php foreach ($g['secciones'] as $sec): ?>
+                        <li class="section-item">
+                            <div>
+                                <div class="section-name">Sección "<?= htmlspecialchars($sec['nombreSeccion']) ?>"</div>
+                                <div class="section-meta">
+                                    <i class="fas fa-users"></i> <?= htmlspecialchars($sec['vacantes']) ?> vacantes
+                                    &nbsp;&middot;&nbsp;
+                                    <i class="fas fa-user-tie"></i> <?= htmlspecialchars($sec['nombres'] . ' ' . $sec['apellidoPaterno']) ?>
+                                </div>
+                            </div>
+                            <div class="section-actions">
+                                <a href="seccion_form.php?idSeccion=<?= $sec['idSeccion'] ?>&idGrado=<?= $g['idGrado'] ?>"
+                                   class="btn btn-warning btn-icon" title="Editar">
+                                    <i class="fas fa-pen"></i>
+                                </a>
+                                <a href="index.php?action=delete&id=<?= $sec['idSeccion'] ?>"
+                                   class="btn btn-danger btn-icon" title="Eliminar"
+                                   onclick="return confirm('¿Eliminar la sección <?= htmlspecialchars($sec['nombreSeccion']) ?>?')">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </li>
+                    <?php endforeach; ?>
+                </ul>
+            <?php else: ?>
+                <div class="empty-state" style="padding:30px;">
+                    <i class="fas fa-inbox" style="font-size:24px;"></i>
+                    <p style="font-size:12px;">Sin secciones registradas</p>
+                </div>
+            <?php endif; ?>
+        </div>
+    <?php endforeach; ?>
+</div>
+
+</div></main></body></html>

@@ -1,177 +1,88 @@
 <?php
-require_once '../Layout/header.php'; 
+require_once '../Layout/header.php';
 require_once '../../Controllers/Gestion_Institucional/PeriodoController.php';
 $control = new PeriodoController();
-
 if (isset($_GET['action']) && $_GET['action'] == 'delete' && isset($_GET['id'])) {
     $control->Eliminar($_GET['id']);
 }
-
 $historial = $control->verHistorial();
 ?>
-
 <style>
-    /* 1. Contenedor y Título Principal */
-    .history-card {
-        background: white;
-        padding: 30px;
-        border-radius: 20px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        max-width: 1000px;
-        margin: 20px auto;
-    }
-
-    .header-section {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 30px;
-        border-bottom: 2px solid #f1f5f9;
-        padding-bottom: 15px;
-    }
-
-    .header-section h2 {
-        color: #1e293b;
-        font-weight: 800;
-        font-size: 1.5rem;
-    }
-
-    /* 2. Tarjetas de Periodo */
-    .period-item {
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        margin-bottom: 25px;
+    .period-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
         overflow: hidden;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 16px;
+        transition: box-shadow 0.15s;
     }
-
-    .period-item:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.08);
-    }
-
-    .period-header {
+    .period-card:hover { box-shadow: var(--shadow-md); }
+    .period-card-header {
+        padding: 14px 20px;
+        background: var(--gray-50);
+        border-bottom: 1px solid var(--border);
         display: flex;
         justify-content: space-between;
         align-items: center;
-        background: #f8fafc;
-        padding: 15px 20px;
-        border-bottom: 1px solid #e2e8f0;
     }
-
-    .period-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        color: #334155;
-    }
-
-    .period-year {
-        font-size: 1.2rem;
-        font-weight: 700;
-        color: #1e293b;
-    }
-
-    .status-badge {
-        font-size: 11px;
-        padding: 4px 10px;
-        border-radius: 20px;
-        background: #e0f2fe;
-        color: #0369a1;
-        text-transform: uppercase;
-        font-weight: 700;
-        letter-spacing: 0.5px;
-    }
-
-    /* 3. Botón Eliminar */
-    .btn-delete-all {
-        color: #ef4444;
-        background: #fef2f2;
-        padding: 8px 14px;
-        border-radius: 10px;
-        font-size: 13px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .btn-delete-all:hover {
-        background: #fee2e2;
-        color: #b91c1c;
-    }
-
-    /* 4. Grid de Bimestres */
-    .bimestres-grid {
+    .period-year { font-size: 15px; font-weight: 700; }
+    .bim-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-        gap: 15px;
-        padding: 20px;
-        background: white;
+        gap: 12px;
+        padding: 16px 20px;
     }
-
-    .bimestre-box {
-        border: 1px solid #f1f5f9;
-        padding: 15px;
-        border-radius: 12px;
-        background: #fcfcfc;
-        text-align: center;
-        border-left: 4px solid #3b82f6; /* Detalle de color */
+    .bim-box {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 12px;
+        border-left: 3px solid var(--color-primary);
     }
-
-    .bi-name {
-        font-weight: 700;
-        color: #3b82f6;
-        font-size: 13px;
-        margin-bottom: 5px;
-    }
-
-    .bi-dates {
-        font-size: 12px;
-        color: #64748b;
-        font-weight: 500;
-    }
+    .bim-name { font-size: 12px; font-weight: 700; color: var(--color-primary); margin-bottom: 4px; }
+    .bim-dates { font-size: 11px; color: var(--text-secondary); }
 </style>
 
-<div class="history-card">
-    <div class="header-section">
-        <h2><i class="fas fa-history" style="color:#64748b; margin-right:10px;"></i> Historial de Periodos</h2>
-        <a href="periodo_form.php" class="btn btn-primary"><i class="fas fa-arrow-left"></i> Volver</a>
+<div class="page-header">
+    <div>
+        <div class="page-title"><i class="fas fa-clock-rotate-left"></i> Historial de Periodos</div>
+        <div class="page-subtitle">Registro de todos los años académicos anteriores</div>
     </div>
+    <a href="periodo_form.php" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Volver</a>
+</div>
 
-    <?php foreach($historial as $p): ?>
-        <div class="period-item">
-            
-            <div class="period-header">
-                <div class="period-info">
-                    <i class="fas fa-calendar-check" style="color: #3b82f6;"></i>
-                    <span class="period-year">Año <?= $p['anio'] ?></span>
-                    <span class="status-badge"><?= $p['estado'] ?></span>
+<?php if (empty($historial)): ?>
+    <div class="card" style="padding:0;">
+        <div class="empty-state">
+            <i class="fas fa-calendar-xmark"></i>
+            <p>No hay periodos en el historial</p>
+        </div>
+    </div>
+<?php else: ?>
+    <?php foreach ($historial as $p): ?>
+        <div class="period-card">
+            <div class="period-card-header">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div class="period-year">Año <?= htmlspecialchars($p['anio']) ?></div>
+                    <span class="badge badge-gray"><?= htmlspecialchars($p['estado']) ?></span>
                 </div>
-                
-                <a href="historial_periodos.php?action=delete&id=<?= $p['idPeriodo'] ?>" 
-                   onclick="return confirm('ATENCIÓN: Se borrarán todas las secciones, matrículas y notas de este año. ¿Continuar?')"
-                   class="btn-delete-all">
-                   <i class="fas fa-trash-alt"></i> Eliminar Historial
+                <a href="historial_periodos.php?action=delete&id=<?= $p['idPeriodo'] ?>"
+                   class="btn btn-danger btn-sm"
+                   onclick="return confirm('ATENCIÓN: Se eliminarán todas las secciones, matrículas y notas de este año. ¿Continuar?')">
+                    <i class="fas fa-trash"></i> Eliminar
                 </a>
             </div>
-
-            <div class="bimestres-grid">
-                <?php foreach($p['bimestres'] as $b): ?>
-                    <div class="bimestre-box">
-                        <div class="bi-name"><?= $b['nombreBimestre'] ?></div>
-                        <div class="bi-dates">
-                            <i class="far fa-clock" style="font-size:10px;"></i>
-                            <?= date("d/m/Y", strtotime($b['fechaInicio'])) ?> - <?= date("d/m/Y", strtotime($b['fechaFin'])) ?>
+            <div class="bim-grid">
+                <?php foreach ($p['bimestres'] as $b): ?>
+                    <div class="bim-box">
+                        <div class="bim-name"><?= htmlspecialchars($b['nombreBimestre']) ?></div>
+                        <div class="bim-dates">
+                            <?= date('d/m/Y', strtotime($b['fechaInicio'])) ?> — <?= date('d/m/Y', strtotime($b['fechaFin'])) ?>
                         </div>
                     </div>
                 <?php endforeach; ?>
             </div>
         </div>
     <?php endforeach; ?>
-</div>
+<?php endif; ?>
 
-</body>
-</html>
+</div></main></body></html>
