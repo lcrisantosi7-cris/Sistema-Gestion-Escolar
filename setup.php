@@ -6,7 +6,7 @@
         3. Carga los roles, niveles y grados
         4. Crea el usuario administrador
         
-        Abre: http://localhost/SistemaColegio/SistemaColegio/setup.php
+        Abre: http://localhost/tu-ruta/setup.php
         
         // Elimina este archivo después de usarlo.
 
