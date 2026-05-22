@@ -50,7 +50,14 @@ class Asignacion {
                 INNER JOIN personal p ON a.idPersonal = p.idPersonal
                 INNER JOIN persona per ON p.idPersona = per.idPersona
                 WHERE a.idSeccion = :idSec
-                ORDER BY FIELD(a.diaSemana, 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes'), a.horaInicio ASC";
+                ORDER BY CASE a.diaSemana
+                    WHEN 'Lunes'     THEN 1
+                    WHEN 'Martes'    THEN 2
+                    WHEN 'Miercoles' THEN 3
+                    WHEN 'Jueves'    THEN 4
+                    WHEN 'Viernes'   THEN 5
+                    ELSE 6
+                END, a.horaInicio ASC";
         $stmt = $obd->conexion->prepare($sql);
         $stmt->bindParam(':idSec', $idSeccion);
         $stmt->execute();
@@ -190,8 +197,14 @@ class Asignacion {
                 INNER JOIN seccion s ON a.idSeccion = s.idSeccion
                 INNER JOIN grado g ON s.idGrado = g.idGrado
                 WHERE a.idPersonal = :idPers AND s.idPeriodo = :idPer
-                -- Ordenar por día de la semana (Lunes a Viernes) y luego por hora
-                ORDER BY FIELD(a.diaSemana, 'Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes'), a.horaInicio ASC";
+                ORDER BY CASE a.diaSemana
+                    WHEN 'Lunes'     THEN 1
+                    WHEN 'Martes'    THEN 2
+                    WHEN 'Miercoles' THEN 3
+                    WHEN 'Jueves'    THEN 4
+                    WHEN 'Viernes'   THEN 5
+                    ELSE 6
+                END, a.horaInicio ASC";
                 
         $stmt = $obd->conexion->prepare($sql);
         $stmt->execute([':idPers' => $idPersonal, ':idPer' => $idPeriodo]);

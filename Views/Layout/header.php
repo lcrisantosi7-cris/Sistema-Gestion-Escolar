@@ -365,6 +365,75 @@
         .empty-state i { font-size: 36px; margin-bottom: 12px; display: block; opacity: 0.4; }
         .empty-state p { font-size: 14px; font-weight: 500; }
 
+        /* ─── PAGE LOADER ────────────────────────────────────────────── */
+        /* Aparece inmediatamente al navegar, elimina la pantalla blanca */
+        #page-loader {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-body);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s;
+        }
+        #page-loader.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+        .loader-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+        .loader-logo {
+            width: 40px;
+            height: 40px;
+            background: var(--color-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 18px;
+        }
+        .loader-bar {
+            width: 160px;
+            height: 3px;
+            background: var(--gray-200);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+        .loader-bar::after {
+            content: '';
+            display: block;
+            height: 100%;
+            width: 40%;
+            background: var(--color-primary);
+            border-radius: 99px;
+            animation: slide 0.9s ease-in-out infinite;
+        }
+        @keyframes slide {
+            0%   { transform: translateX(-100%); }
+            100% { transform: translateX(400%); }
+        }
+
+        /* Barra de progreso fina en la parte superior (estilo GitHub/YouTube) */
+        #nprogress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 2px;
+            background: var(--color-primary);
+            z-index: 10000;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 0 2px 2px 0;
+            box-shadow: 0 0 8px var(--color-primary);
+        }
+
         /* Utility */
         .text-muted   { color: var(--text-secondary); }
         .text-primary { color: var(--color-primary); }
@@ -374,6 +443,66 @@
     </style>
 </head>
 <body>
+
+<!-- Barra de progreso superior -->
+<div id="nprogress-bar"></div>
+
+<!-- Loader de página completa -->
+<div id="page-loader">
+    <div class="loader-inner">
+        <div class="loader-logo"><i class="fas fa-graduation-cap"></i></div>
+        <div class="loader-bar"></div>
+    </div>
+</div>
+
+<script>
+    // Muestra el loader al salir de la página (clic en enlace o botón submit)
+    (function() {
+        var bar    = document.getElementById('nprogress-bar');
+        var loader = document.getElementById('page-loader');
+        var timer;
+
+        function showLoader() {
+            // Barra superior: avanza rápido al 70% y luego espera
+            bar.style.width = '0%';
+            bar.style.transition = 'none';
+            setTimeout(function() {
+                bar.style.transition = 'width 0.4s ease';
+                bar.style.width = '70%';
+            }, 10);
+            // Loader central: aparece solo si tarda más de 200ms
+            timer = setTimeout(function() {
+                loader.classList.add('visible');
+            }, 200);
+        }
+
+        function hideLoader() {
+            clearTimeout(timer);
+            bar.style.width = '100%';
+            loader.classList.remove('visible');
+            setTimeout(function() { bar.style.width = '0%'; }, 300);
+        }
+
+        // Interceptar clics en enlaces internos
+        document.addEventListener('click', function(e) {
+            var a = e.target.closest('a[href]');
+            if (!a) return;
+            var href = a.getAttribute('href');
+            // Ignorar: anclas, javascript:, target=_blank, externos
+            if (!href || href.startsWith('#') || href.startsWith('javascript')
+                || a.target === '_blank' || href.startsWith('http')) return;
+            showLoader();
+        });
+
+        // Interceptar envío de formularios
+        document.addEventListener('submit', function() {
+            showLoader();
+        });
+
+        // Ocultar cuando la página ya cargó (por si el usuario vuelve con el botón atrás)
+        window.addEventListener('pageshow', hideLoader);
+    })();
+</script>
 
 <?php include 'sidebar.php'; ?>
 

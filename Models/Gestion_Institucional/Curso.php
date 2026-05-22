@@ -55,23 +55,21 @@ class Curso {
         $obd = new Database();
         $obd->conectar();
         if ($this->idCurso) {
-            $sql = "UPDATE curso SET nombreCurso = :nom, idNivel = :idn WHERE idCurso = :id";
+            $sql  = "UPDATE curso SET nombreCurso = :nom, idNivel = :idn WHERE idCurso = :id";
             $stmt = $obd->conexion->prepare($sql);
             $stmt->bindParam(':nom', $this->nombreCurso);
             $stmt->bindParam(':idn', $this->idNivel);
-            $stmt->bindParam(':id', $this->idCurso);
+            $stmt->bindParam(':id',  $this->idCurso);
+            return $stmt->execute() ? $this->idCurso : false;
         } else {
-            $sql = "INSERT INTO curso (nombreCurso, idNivel) VALUES (:nom, :idn)";
+            // RETURNING para obtener el ID en PostgreSQL
+            $sql  = "INSERT INTO curso (nombreCurso, idNivel) VALUES (:nom, :idn) RETURNING idCurso";
             $stmt = $obd->conexion->prepare($sql);
             $stmt->bindParam(':nom', $this->nombreCurso);
             $stmt->bindParam(':idn', $this->idNivel);
+            $stmt->execute();
+            return $stmt->fetchColumn();
         }
-        
-        if ($stmt->execute()) {
-            // Si es insert, retornamos el ID creado para poder agregar competencias
-            return $this->idCurso ? $this->idCurso : $obd->conexion->lastInsertId();
-        }
-        return false;
     }
 
     public function eliminar($id) {

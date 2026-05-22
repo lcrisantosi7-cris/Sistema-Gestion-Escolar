@@ -19,9 +19,11 @@ class Bimestre{
     public function listarPorPeriodo($idPeriodo) {
         $obd = new Database();
         $obd->conectar();
-        $sql = "SELECT * FROM bimestre WHERE idPeriodo = $idPeriodo";
-        $result = $obd->conexion->query($sql);
-        return $result->fetchAll(PDO::FETCH_ASSOC);
+        $sql  = "SELECT * FROM bimestre WHERE idPeriodo = :id ORDER BY idBimestre ASC";
+        $stmt = $obd->conexion->prepare($sql);
+        $stmt->bindParam(':id', $idPeriodo);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     public function ActualizarDatos($idBimestre, $fInicio, $fFin, $estado) {

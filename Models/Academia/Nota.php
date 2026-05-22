@@ -100,10 +100,12 @@ class Nota {
         try {
             $obd->conexion->beginTransaction();
             
-            $sql = "INSERT INTO calificacioncurso (idMatricula, idCompetenciaCurso, idBimestre, nota) 
+            // PostgreSQL: ON CONFLICT ... DO UPDATE (equivalente a ON DUPLICATE KEY UPDATE de MySQL)
+            $sql = "INSERT INTO calificacioncurso (idMatricula, idCompetenciaCurso, idBimestre, nota)
                     VALUES (:idMat, :idComp, :idBi, :nota)
-                    ON DUPLICATE KEY UPDATE nota = :notaUpd";
-            
+                    ON CONFLICT (idMatricula, idCompetenciaCurso, idBimestre)
+                    DO UPDATE SET nota = EXCLUDED.nota";
+
             $stmt = $obd->conexion->prepare($sql);
 
             foreach ($datosNotas as $idMatricula => $competencias) {
@@ -111,11 +113,10 @@ class Nota {
                     foreach ($bimestres as $idBimestre => $nota) {
                         if ($nota !== "") {
                             $stmt->execute([
-                                ':idMat' => $idMatricula,
+                                ':idMat'  => $idMatricula,
                                 ':idComp' => $idCompetencia,
-                                ':idBi' => $idBimestre,
-                                ':nota' => $nota,
-                                ':notaUpd' => $nota
+                                ':idBi'   => $idBimestre,
+                                ':nota'   => $nota,
                             ]);
                         }
                     }

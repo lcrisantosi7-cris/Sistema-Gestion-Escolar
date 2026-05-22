@@ -1,0 +1,30 @@
+# ─── Scripts de instalación (solo se usan una vez, no van al repo) ───
+setup.php
+crear_admin.php
+run_migration.php
+seed_grados.php
+test_conexion.php
+
+# ─── Credenciales y configuración sensible ───────────────────────────
+# Si en algún momento mueves las credenciales a un .env, agrégalo aquí:
+# .env
+# .env.local
+
+# ─── Dependencias (si en el futuro usas Composer) ────────────────────
+vendor/
+composer.lock
+
+# ─── Caché y logs de PHP/Apache ──────────────────────────────────────
+*.log
+*.cache
+
+# ─── Sistema operativo ───────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ─── IDEs y editores ─────────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.user

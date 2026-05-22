@@ -2,6 +2,7 @@
 require_once '../../Config/database.php';
 
 class Estudiante {
+
     public function buscarPorDni($dni) {
         $obd = new Database();
         $obd->conectar();
@@ -23,28 +24,26 @@ class Estudiante {
         try {
             $obd->conexion->beginTransaction();
 
-            // 1. PERSONA ESTUDIANTE: (dni, nombres, apellidoPaterno, apellidoMaterno, genero, direccion, fechaNacimiento)
-            // Nota: 'direccion' es obligatoria, pasamos un guión '-'
-            $sqlP = "INSERT INTO persona (dni, nombres, apellidoPaterno, apellidoMaterno, genero, direccion, fechaNacimiento) 
-                     VALUES (?, ?, ?, ?, ?, '-', ?)";
-            
+            // RETURNING en lugar de lastInsertId()
+            $sqlP = "INSERT INTO persona (dni, nombres, apellidoPaterno, apellidoMaterno, genero, direccion, fechaNacimiento)
+                     VALUES (?, ?, ?, ?, ?, '-', ?)
+                     RETURNING idPersona";
             $stmtP = $obd->conexion->prepare($sqlP);
-            // ORDEN EXACTO:
             $stmtP->execute([
-                $datosPer['dni'], 
-                $datosPer['nombres'], 
-                $datosPer['paterno'], 
-                $datosPer['materno'], 
-                $datosPer['genero'], 
+                $datosPer['dni'],
+                $datosPer['nombres'],
+                $datosPer['paterno'],
+                $datosPer['materno'],
+                $datosPer['genero'],
                 $datosPer['nacimiento']
             ]);
-            $idPersona = $obd->conexion->lastInsertId();
+            $idPersona = $stmtP->fetchColumn();
 
-            // 2. ESTUDIANTE: (edad, idPersona, idApoderado)
-            $sqlE = "INSERT INTO estudiante (edad, idPersona, idApoderado) VALUES (?, ?, ?)";
+            $sqlE = "INSERT INTO estudiante (edad, idPersona, idApoderado) VALUES (?, ?, ?)
+                     RETURNING idEstudiante";
             $stmtE = $obd->conexion->prepare($sqlE);
             $stmtE->execute([$edad, $idPersona, $idApoderado]);
-            $idEstudiante = $obd->conexion->lastInsertId();
+            $idEstudiante = $stmtE->fetchColumn();
 
             $obd->conexion->commit();
             return $idEstudiante;
