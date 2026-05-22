@@ -212,7 +212,7 @@ Generar boletas           →  Boletas de Notas
 
 **Login**
 
-> ![Pantalla de login de EduCore](EduCore/dasboard.png.png)
+> ![Pantalla de login de EduCore](EduCore/dasboard.png)
 
 **Dashboard — Director y Secretaria**
 
