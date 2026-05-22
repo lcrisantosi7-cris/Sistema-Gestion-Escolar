@@ -1,30 +1,20 @@
 <?php
-/**
- * Configuración de conexión — Supabase (PostgreSQL)
- *
- * PostgreSQL normaliza los identificadores a minúsculas a menos que estén
- * entre comillas dobles. Para no tener que reescribir cada consulta con
- * aliases, usamos un mapa de normalización que convierte las claves que
- * devuelve PDO al camelCase que espera el resto del sistema.
- */
+// Configuración de conexión — Supabase (PostgreSQL)
 class Database {
     public $conexion;
 
-    // ─── Singleton global: una sola conexión por request ─────────────────────
+    // ─── Singleton global: una sola conexión por request
     private static ?PDONormalizer $sharedConnection = null;
 
-    // ─── Credenciales ────────────────────────────────────────────────────────
+    // Credenciales (reemplazar con variables de entorno en producción) o en clonar el repo, crear un archivo local config/database.local.php con estas variables:
     private $host    = 'aws-1-us-east-1.pooler.supabase.com';
     private $dbname  = 'postgres';
     private $usuario = 'postgres.hygfnzmuhoutcfadeawn';
     private $clave   = 'SistemaGestionEscolar';
     private $puerto  = '6543';
-    // ─────────────────────────────────────────────────────────────────────────
+    
 
-    /**
-     * Mapa: clave_en_minúsculas → camelCase esperado por el sistema.
-     * Solo se necesitan las columnas cuyos nombres tienen mayúsculas internas.
-     */
+    // Mapa: clave_en_minúsculas → camelCase esperado por el sistema.
     private static $keyMap = [
         // persona
         'idpersona'               => 'idPersona',
@@ -68,21 +58,21 @@ class Database {
         'idestudiante'            => 'idEstudiante',
         'idapoderado'             => 'idApoderado',
         'ultimamatricula'         => 'ultimaMatricula',
-        'doc_ficha_matricula'     => 'doc_ficha_matricula',   // ya en snake_case, sin cambio
+        'doc_ficha_matricula'     => 'doc_ficha_matricula',  
         'doc_copia_dni'           => 'doc_copia_dni',
         'doc_certificado_estudios'=> 'doc_certificado_estudios',
         'doc_partida_nacimiento'  => 'doc_partida_nacimiento',
         // asistencia
         'idasistencia'            => 'idAsistencia',
         'fechahora'               => 'fechaHora',
-        // boleta (aliases ya definidos en SQL, pero por si acaso)
+        // boleta 
         'nomest'                  => 'nomEst',
         'apepatest'               => 'apePatEst',
         'apematest'               => 'apeMatEst',
         'nomtut'                  => 'nomTut',
         'apepattut'               => 'apePatTut',
         'apemattut'               => 'apeMatTut',
-        // conducta (typo original en BD mantenido)
+        // conducta 
         'nombrecondcuta'          => 'nombreCondcuta',
     ];
 
@@ -111,7 +101,7 @@ class Database {
         }
     }
 
-    /** Normaliza un array asociativo usando el mapa de claves. */
+
     public static function fixKeys(array $row): array {
         $out = [];
         foreach ($row as $k => $v) {
@@ -122,7 +112,7 @@ class Database {
     }
 }
 
-// ─── PDO wrapper que normaliza claves automáticamente ────────────────────────
+// PDO wrapper que normaliza claves automáticamente 
 // Extiende PDO para que fetch() y fetchAll() apliquen fixKeys() de forma
 // transparente. Así ningún modelo necesita cambios.
 
@@ -145,7 +135,6 @@ class PDOStatementNormalizer {
         $this->stmt = $stmt;
     }
 
-    /** Delega cualquier método no definido aquí al PDOStatement real. */
     public function __call(string $name, array $args): mixed {
         return $this->stmt->$name(...$args);
     }

@@ -1,5 +1,5 @@
 <?php
-// CORRECCIÓN: Evitar el error "Ignoring session_start"
+
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
